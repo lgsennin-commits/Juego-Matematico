@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Games Center</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0077b6">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0077b6;
+            --light-blue: #90e0ef;
+            --ultra-light-blue: #caf0f8;
+            --white: #ffffff;
+            --text-dark: #023e8a;
+            --success: #4ade80;
+            --error: #f87171;
+            --orange: #f97316;
+            --pink: #ec4899;
+            --yellow: #eab308;
+            --green: #22c55e;
+            --purple: #a855f7;
+            --red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-dark);
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.95);
+            /* backdrop-filter acts glitchy in some old browsers, using safe fallback */
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            position: relative;
+            transition: max-width 0.4s ease;
+        }
+
+        /* Using simple class toggle for wide instead of :has */
+        .glass-container.is-wide {
+            max-width: 950px;
+            padding: 30px;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+
+        /* BOTONES */
+        .primary-btn,
+        .secondary-btn {
+            color: var(--white);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--light-blue), var(--primary-blue));
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3);
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #fbc2eb, var(--purple));
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .primary-btn:hover,
+        .secondary-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        .text-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+
+        .text-btn:hover {
+            color: var(--text-dark);
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .menu-btn {
+            height: 70px;
+            font-size: 1.4rem;
+        }
+
+        .emoji {
+            font-size: 1.8rem;
+        }
+
+        /* JUEGO 1 UI */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--ultra-light-blue);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0096c7, var(--primary-blue));
+            transition: width 0.4s ease;
+            border-radius: 6px;
+        }
+
+        .question-container {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .question-container.small {
+            font-size: 2.2rem;
+            margin: 10px 0;
+        }
+
+        #g1-question-mark,
+        #g2-question-mark {
+            color: var(--pink);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .options-grid.small {
+            gap: 10px;
+        }
+
+        .option-btn {
+            background: var(--white);
+            border: 2px solid var(--ultra-light-blue);
+            color: var(--primary-blue);
+            font-size: 1.6rem;
+            font-weight: 700;
+            padding: 15px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .options-grid.small .option-btn {
+            padding: 10px;
+            font-size: 1.3rem;
+            border-radius: 10px;
+        }
+
+        .option-btn:hover {
+            background: var(--ultra-light-blue);
+            transform: scale(1.03);
+        }
+
+        .option-btn.correct {
+            background: var(--success);
+            color: var(--white);
+            border-color: var(--success);
+            transform: scale(1.05);
+        }
+
+        .option-btn.wrong {
+            background: var(--error);
+            color: var(--white);
+            border-color: var(--error);
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            50% {
+                transform: translateX(5px);
+            }
+
+            75% {
+                transform: translateX(-5px);
+            }
+        }
+
+        .feedback {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-top: 10px;
+            min-height: 26px;
+            transition: opacity 0.3s;
+        }
+
+        .feedback.success {
+            color: var(--success);
+        }
+
+        .feedback.error {
+            color: var(--error);
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            visibility: hidden;
+        }
+
+        /* JUEGO 2 UI (SERPIENTES Y ESCALERAS) */
+        .setup-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .player-selector {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 2rem;
+        }
+
+        .icon-btn {
+            background: var(--ultra-light-blue);
+            color: var(--primary-blue);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--light-blue);
+            transform: scale(1.1);
+        }
+
+        .g2-layout {
+            display: flex;
+            gap: 30px;
+            align-items: stretch;
+            text-align: left;
+            height: 500px;
+            flex-wrap: wrap;
+        }
+
+        .g2-sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-right: 2px dashed var(--ultra-light-blue);
+            padding-right: 20px;
+            min-width: 280px;
+        }
+
+        .g2-board-area {
+            flex: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            border-radius: 16px;
+            border: 4px solid var(--ultra-light-blue);
+            padding: 5px;
+            min-width: 300px;
+        }
+
+        /* Tablero */
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            width: 100%;
+            height: 100%;
+            gap: 2px;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 12px;
+        }
+
+        .board-cell {
+            position: relative;
+            background: var(--white);
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: 5px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .board-cell.bg-1 {
+            background: #fdf4ff;
+        }
+
+        /* rosa claro */
+        .board-cell.bg-2 {
+            background: #f0fdf4;
+        }
+
+        /* verde claro */
+        .board-cell.bg-3 {
+            background: #fffbeb;
+        }
+
+        /* amarillo claro */
+        .board-cell.bg-4 {
+            background: #f0f9ff;
+        }
+
+        /* azul claro */
+
+        /* Serpientes y Escaleras Marcas */
+        .sn-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            font-size: 1.3rem;
+            opacity: 0.6;
+            padding: 2px;
+        }
+
+        /* Fichas / Tokens */
+        .player-tokens-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            padding: 8px;
+        }
+
+        .player-token {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease;
+            z-index: 10;
+        }
+
+        .token-p1 {
+            background: var(--red);
+        }
+
+        .token-p2 {
+            background: var(--green);
+        }
+
+        .token-p3 {
+            background: var(--yellow);
+        }
+
+        .token-p4 {
+            background: var(--purple);
+        }
+
+        /* Sidebar UI */
+        .turn-indicator {
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            transition: background 0.3s;
+        }
+
+        .turn-p1 {
+            background: var(--red);
+        }
+
+        .turn-p2 {
+            background: var(--green);
+        }
+
+        .turn-p3 {
+            background: var(--yellow);
+        }
+
+        .turn-p4 {
+            background: var(--purple);
+        }
+
+        .players-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .p-card {
+            background: var(--ultra-light-blue);
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .p-card .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .question-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .question-prompt {
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+
+        .dice-area {
+            text-align: center;
+            animation: popIn 0.3s;
+            padding: 10px;
+            border-radius: 12px;
+            background: #fffbeb;
+            border: 2px solid var(--yellow);
+        }
+
+        .dice {
+            font-size: 4rem;
+            margin-bottom: 5px;
+            animation: roll 0.5s;
+        }
+
+        #dice-result-text {
+            font-weight: 700;
+            color: var(--orange);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes roll {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .icon-success {
+            font-size: 4rem;
+            animation: popIn 1s infinite alternate;
+        }
+
+        @media (max-width: 768px) {
+            .g2-layout {
+                flex-direction: column;
+                height: auto;
+                border: none;
+                padding: 0;
+            }
+
+            .g2-sidebar {
+                border-right: none;
+                border-bottom: 2px dashed var(--ultra-light-blue);
+                padding-bottom: 20px;
+            }
+
+            .board-grid {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="glass-container">
+
+        <!-- PANTALLA MENÚ PRINCIPAL -->
+        <div id="main-menu" class="screen active">
+            <h1>Centro Matemático</h1>
+            <p class="subtitle">Selecciona tu aventura matemática favorita y diviértete aprendiendo.</p>
+            <div class="menu-buttons">
+                <button id="btn-menu-g1" class="menu-btn primary-btn">
+                    <span class="emoji">🧠</span> Juego Clásico de Etapas
+                </button>
+                <button id="btn-menu-g2" class="menu-btn secondary-btn">
+                    <span class="emoji">🐍</span> Serpientes y Escaleras
+                </button>
+            </div>
+            <!-- Alert log error UI si llegara a suceder un error en JS -->
+            <div id="debug-log" style="color: red; font-size: 0.8rem; margin-top: 10px;"></div>
+
+            <p style="margin-top: 30px; font-size: 0.9rem; color: #64748b;">
+                Creado y dirigido por <strong>GT</strong> en <strong>CTP Vázquez de Coronado</strong>
+            </p>
+        </div>
+
+        <!-- JUEGO 1: PANTALLA DE INICIO -->
+        <div id="g1-start-screen" class="screen">
+            <h1>Juego de Etapas</h1>
+            <p>Resuelve problemas y avanza. ¡Cada 5 niveles subes de etapa!</p>
+            <button id="btn-start-g1" class="primary-btn">Comenzar Aventura</button>
+            <button class="text-btn btn-back">Volver al Menú</button>
+        </div>
+
+        <!-- JUEGO 1: PANTALLA DE JUEGO -->
+        <div id="g1-game-screen" class="screen">
+            <div class="header">
+                <div class="stage-info">Etapa <span id="g1-stage-display">1</span></div>
+                <div class="level-info">Nivel <span id="g1-level-display">1</span>/5</div>
+            </div>
+
+            <div class="progress-bar">
+                <div id="g1-progress-fill" class="progress-fill"></div>
+            </div>
+
+            <div class="question-container">
+                <span id="g1-question-text"></span>
+                <span class="equals">=</span>
+                <span id="g1-question-mark">?</span>
+            </div>
+
+            <div id="g1-options-container" class="options-grid"></div>
+            <div id="g1-feedback" class="feedback"></div>
+            <button class="text-btn btn-back" style="margin-top:20px;">Abandonar Partida</button>
+        </div>
+
+        <!-- JUEGO 1: PANTALLA DE ETAPA COMPLETADA -->
+        <div id="g1-stage-screen" class="screen">
+            <div class="icon-success">🏆</div>
+            <h2 id="g1-stage-title">¡Etapa Completada!</h2>
+            <p>¡Prepárate para problemas más difíciles!</p>
+            <button id="btn-next-stage-g1" class="primary-btn">Siguiente Etapa</button>
+            <button class="text-btn btn-back" style="margin-top:10px;">Volver al Menú</button>
+        </div>
+
+        <!-- JUEGO 2: PANTALLA DE AJUSTES -->
+        <div id="g2-setup-screen" class="screen">
+            <h1>Serpientes y Escaleras</h1>
+            <p>Multijugador local (1 a 4 jugadores). ¡La dificultad se adapta a tus aciertos!</p>
+            <div class="setup-container">
+                <label for="num-players">Número de Jugadores:</label>
+                <div class="player-selector">
+                    <button id="btn-minus" class="icon-btn">-</button>
+                    <span id="players-count">2</span>
+                    <button id="btn-plus" class="icon-btn">+</button>
+                </div>
+            </div>
+            <button id="btn-start-g2" class="secondary-btn">Empezar Partida</button>
+            <button class="text-btn btn-back">Volver al Menú</button>
+        </div>
+
+        <!-- JUEGO 2: PANTALLA DE JUEGO MESA -->
+        <div id="g2-game-screen" class="screen wide">
+            <div class="g2-layout">
+                <div class="g2-sidebar">
+                    <div class="turn-indicator" id="g2-turn-box">
+                        <h3 id="g2-turn-text">Turno del Jugador 1</h3>
+                    </div>
+
+                    <div id="g2-players-info" class="players-info"></div>
+
+                    <div class="question-box" id="g2-question-area">
+                        <p class="question-prompt">¡Responde para tirar el dado!</p>
+                        <div class="question-container small">
+                            <span id="g2-question-text">2 + 2</span> = <span id="g2-question-mark">?</span>
+                        </div>
+                        <div id="g2-options-container" class="options-grid small"></div>
+                        <div id="g2-feedback" class="feedback"></div>
+                    </div>
+
+                    <div id="dice-area" class="dice-area hidden">
+                        <div class="dice" id="dice">🎲</div>
+                        <p id="dice-result-text">Has sacado un 4</p>
+                    </div>
+                </div>
+
+                <div class="g2-board-area">
+                    <div id="board-grid" class="board-grid"></div>
+                </div>
+            </div>
+            <button class="text-btn btn-back" style="margin-top:15px;">Abandonar Partida</button>
+        </div>
+
+        <!-- JUEGO 2: PANTALLA DE VICTORIA -->
+        <div id="g2-win-screen" class="screen">
+            <div class="icon-success">🎉</div>
+            <h2 id="g2-win-title">¡El Jugador 1 gana!</h2>
+            <button class="primary-btn btn-back">Volver al Menú</button>
+        </div>
+
+    </div>
+
+    <!-- TODO EL JAVASCRIPT INCLUIDO Y VERIFICADO -->
+    <script>
+        try {
+            const screens = {
+                menu: document.getElementById('main-menu'),
+                g1Start: document.getElementById('g1-start-screen'),
+                g1Game: document.getElementById('g1-game-screen'),
+                g1Stage: document.getElementById('g1-stage-screen'),
+                g2Setup: document.getElementById('g2-setup-screen'),
+                g2Game: document.getElementById('g2-game-screen'),
+                g2Win: document.getElementById('g2-win-screen')
+            };
+
+            const appContainer = document.getElementById('app');
+
+            function showScreen(screenKey) {
+                Object.values(screens).forEach(s => s.classList.remove('active'));
+                screens[screenKey].classList.add('active');
+
+                // Logica responsive: ensanchar el main container si estamos en tablero multijugador
+                if (screenKey === 'g2Game') {
+                    appContainer.classList.add('is-wide');
+                } else {
+                    appContainer.classList.remove('is-wide');
+                }
+            }
+
+            // Navegación
+            document.getElementById('btn-menu-g1').addEventListener('click', () => showScreen('g1Start'));
+            document.getElementById('btn-menu-g2').addEventListener('click', () => showScreen('g2Setup'));
+            document.querySelectorAll('.btn-back').forEach(btn => {
+                btn.addEventListener('click', () => showScreen('menu'));
+            });
+
+            // ----------------------------------------
+            //  JUEGO 1: ETAPAS
+            // ----------------------------------------
+            let g1Stage = 1;
+            let g1LevelsWon = 0;
+            let g1CorrectAnswer = 0;
+
+            const elG1 = {
+                stageDisp: document.getElementById('g1-stage-display'),
+                levelDisp: document.getElementById('g1-level-display'),
+                progFill: document.getElementById('g1-progress-fill'),
+                qText: document.getElementById('g1-question-text'),
+                optsGrid: document.getElementById('g1-options-container'),
+                feedback: document.getElementById('g1-feedback'),
+                stageTitle: document.getElementById('g1-stage-title')
+            };
+
+            document.getElementById('btn-start-g1').addEventListener('click', () => { g1Stage = 1; g1LevelsWon = 0; g1UpdateUI(); g1Gen(); showScreen('g1Game'); });
+            document.getElementById('btn-next-stage-g1').addEventListener('click', () => { g1Stage++; g1LevelsWon = 0; g1UpdateUI(); g1Gen(); showScreen('g1Game'); });
+
+            function g1UpdateUI() {
+                elG1.stageDisp.textContent = g1Stage;
+                elG1.levelDisp.textContent = g1LevelsWon + 1 > 5 ? 5 : g1LevelsWon + 1;
+                elG1.progFill.style.width = ((g1LevelsWon / 5) * 100) + '%';
+            }
+
+            function genMath(difficulty) {
+                let operator;
+                if (difficulty === 1) operator = '+';
+                else if (difficulty === 2) operator = '-';
+                else if (difficulty === 3) operator = 'x';
+                else if (difficulty === 4) operator = '/';
+                else {
+                    const ops = ['+', '-', 'x', '/'];
+                    operator = ops[Math.floor(Math.random() * ops.length)];
+                }
+
+                let num1, num2, correct;
+                let max = 10 + (difficulty * 5);
+
+                switch (operator) {
+                    case '+':
+                        num1 = Math.floor(Math.random() * max) + 1;
+                        num2 = Math.floor(Math.random() * max) + 1;
+                        correct = num1 + num2; break;
+                    case '-':
+                        num1 = Math.floor(Math.random() * max) + 5;
+                        num2 = Math.floor(Math.random() * num1) + 1;
+                        correct = num1 - num2; break;
+                    case 'x':
+                        let mMax = Math.min(12, 3 + difficulty);
+                        num1 = Math.floor(Math.random() * mMax) + 2;
+                        num2 = Math.floor(Math.random() * mMax) + 2;
+                        correct = num1 * num2; break;
+                    case '/':
+                        num2 = Math.floor(Math.random() * 10) + 2;
+                        let temp = Math.floor(Math.random() * 10) + 2;
+                        num1 = num2 * temp;
+                        correct = temp; break;
+                }
+                return { n1: num1, op: operator, n2: num2, ans: correct };
+            }
+
+            function g1Gen() {
+                elG1.feedback.className = 'feedback hidden';
+                elG1.optsGrid.innerHTML = '';
+
+                let prob = genMath(g1Stage);
+                g1CorrectAnswer = prob.ans;
+                elG1.qText.textContent = prob.n1 + " " + prob.op + " " + prob.n2;
+
+                let opts = [prob.ans];
+                while (opts.length < 4) {
+                    let off = Math.floor(Math.random() * 10) - 5;
+                    if (off === 0) off = 1;
+                    let w = prob.ans + off;
+                    if (w < 0 && prob.op !== '-') w = Math.abs(w) + 2;
+                    if (opts.indexOf(w) === -1) opts.push(w);
+                }
+                opts.sort(() => Math.random() - 0.5);
+
+                opts.forEach(function (o) {
+                    let b = document.createElement('button');
+                    b.className = 'option-btn';
+                    b.textContent = o;
+                    b.onclick = function () { g1Check(o, b); };
+                    elG1.optsGrid.appendChild(b);
+                });
+            }
+
+            function g1Check(sel, btn) {
+                const btns = elG1.optsGrid.querySelectorAll('.option-btn');
+                btns.forEach(b => b.style.pointerEvents = 'none');
+
+                if (sel === g1CorrectAnswer) {
+                    btn.classList.add('correct');
+                    elG1.feedback.textContent = '¡Correcto!';
+                    elG1.feedback.className = 'feedback success';
+                    g1LevelsWon++;
+                    g1UpdateUI();
+                    setTimeout(() => {
+                        if (g1LevelsWon >= 5) {
+                            elG1.progFill.style.width = '100%';
+                            setTimeout(() => { elG1.stageTitle.textContent = '¡Etapa ' + g1Stage + ' Completada!'; showScreen('g1Stage'); }, 400);
+                        } else g1Gen();
+                    }, 1000);
+                } else {
+                    btn.classList.add('wrong');
+                    elG1.feedback.textContent = '¡Incorrecto! Intenta otra vez.';
+                    elG1.feedback.className = 'feedback error';
+                    btns.forEach(b => { if (parseInt(b.textContent) === g1CorrectAnswer) b.classList.add('correct'); });
+                    setTimeout(g1Gen, 1500);
+                }
+            }
+
+            // ----------------------------------------
+            //  JUEGO 2: SERPIENTES Y ESCALERAS
+            // ----------------------------------------
+            let g2PlayersCount = 2;
+            let g2Players = [];
+            let g2Turn = 0;
+            let g2CorrectAnswer = 0;
+            let diceAnimating = false;
+
+            const boardMap = {
+                4: 14, 9: 31, 20: 38, 28: 42,   // Escaleras
+                17: 7, 34: 15, 46: 25, 49: 11   // Serpientes
+            };
+
+            const elG2 = {
+                countDisp: document.getElementById('players-count'),
+                boardGrid: document.getElementById('board-grid'),
+                turnBox: document.getElementById('g2-turn-box'),
+                turnText: document.getElementById('g2-turn-text'),
+                pInfo: document.getElementById('g2-players-info'),
+                qArea: document.getElementById('g2-question-area'),
+                qText: document.getElementById('g2-question-text'),
+                optsGrid: document.getElementById('g2-options-container'),
+                feedback: document.getElementById('g2-feedback'),
+                diceArea: document.getElementById('dice-area'),
+                dice: document.getElementById('dice'),
+                diceRes: document.getElementById('dice-result-text'),
+                winTitle: document.getElementById('g2-win-title')
+            };
+
+            const btnMinus = document.getElementById('btn-minus');
+            const btnPlus = document.getElementById('btn-plus');
+            btnMinus.onclick = () => { if (g2PlayersCount > 1) elG2.countDisp.textContent = --g2PlayersCount; };
+            btnPlus.onclick = () => { if (g2PlayersCount < 4) elG2.countDisp.textContent = ++g2PlayersCount; };
+
+            document.getElementById('btn-start-g2').addEventListener('click', () => {
+                const colors = ['p1', 'p2', 'p3', 'p4'];
+                g2Players = [];
+                for (let i = 0; i < g2PlayersCount; i++) {
+                    g2Players.push({ id: i + 1, pos: 1, diff: 1, colorCls: 'token-' + colors[i], boxCls: 'turn-' + colors[i] });
+                }
+                g2Turn = 0;
+                diceAnimating = false;
+
+                renderBoard();
+                updatePlayersInfo();
+                startTurn();
+                showScreen('g2Game');
+            });
+
+            function renderBoard() {
+                elG2.boardGrid.innerHTML = '';
+
+                // Renderizamos 5 filas de 10 casillas. Para facilitar, patrón fijo visual.
+                const correctOrder = [
+                    50, 49, 48, 47, 46, 45, 44, 43, 42, 41,
+                    31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+                    30, 29, 28, 27, 26, 25, 24, 23, 22, 21,
+                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                    10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+                ];
+
+                correctOrder.forEach(function (num) {
+                    let cell = document.createElement('div');
+                    cell.className = 'board-cell bg-' + ((num % 4) + 1);
+                    cell.id = 'cell-' + num;
+                    cell.textContent = num;
+
+                    let snInd = document.createElement('div');
+                    snInd.className = 'sn-indicator';
+                    if (boardMap[num]) {
+                        snInd.textContent = boardMap[num] > num ? '🪜' : '🐍';
+                    }
+                    cell.appendChild(snInd);
+
+                    let tkCtx = document.createElement('div');
+                    tkCtx.className = 'player-tokens-container';
+                    tkCtx.id = 'tokens-' + num;
+                    cell.appendChild(tkCtx);
+
+                    elG2.boardGrid.appendChild(cell);
+                });
+
+                drawTokens();
+            }
+
+            function drawTokens() {
+                let allContainers = elG2.boardGrid.querySelectorAll('.player-tokens-container');
+                for (let i = 0; i < allContainers.length; i++) {
+                    allContainers[i].innerHTML = '';
+                }
+
+                g2Players.forEach(function (p) {
+                    let container = document.getElementById('tokens-' + p.pos);
+                    if (container) {
+                        let tk = document.createElement('div');
+                        tk.className = 'player-token ' + p.colorCls;
+                        container.appendChild(tk);
+                    }
+                });
+            }
+
+            function updatePlayersInfo() {
+                elG2.pInfo.innerHTML = '';
+                g2Players.forEach(function (p) {
+                    let c = document.createElement('div');
+                    c.className = 'p-card';
+                    c.innerHTML = '<div class="dot ' + p.colorCls + '"></div> J' + p.id + ' (Pos: ' + p.pos + ')';
+                    elG2.pInfo.appendChild(c);
+                });
+            }
+
+            function startTurn() {
+                if (diceAnimating) return;
+                elG2.diceArea.classList.add('hidden');
+                elG2.qArea.classList.remove('hidden');
+
+                let p = g2Players[g2Turn];
+                elG2.turnBox.className = 'turn-indicator ' + p.boxCls;
+                elG2.turnText.textContent = 'Turno Jugador ' + p.id + ' (Nivel ' + p.diff + ')';
+
+                g2GenProblem(p.diff);
+            }
+
+            function g2GenProblem(diff) {
+                elG2.feedback.className = 'feedback hidden';
+                elG2.optsGrid.innerHTML = '';
+
+                let prob = genMath(diff);
+                g2CorrectAnswer = prob.ans;
+                elG2.qText.textContent = prob.n1 + " " + prob.op + " " + prob.n2;
+
+                let opts = [prob.ans];
+                while (opts.length < 4) {
+                    let off = Math.floor(Math.random() * 10) - 5;
+                    if (off === 0) off = 1;
+                    let w = prob.ans + off;
+                    if (w < 0 && prob.op !== '-') w = Math.abs(w) + 2;
+                    if (opts.indexOf(w) === -1) opts.push(w);
+                }
+                opts.sort(() => Math.random() - 0.5);
+
+                opts.forEach(function (o) {
+                    let b = document.createElement('button');
+                    b.className = 'option-btn';
+                    b.textContent = o;
+                    b.onclick = function () { g2Check(o, b); };
+                    elG2.optsGrid.appendChild(b);
+                });
+            }
+
+            function g2Check(sel, btn) {
+                const btns = elG2.optsGrid.querySelectorAll('.option-btn');
+                btns.forEach(b => b.style.pointerEvents = 'none');
+
+                if (sel === g2CorrectAnswer) {
+                    btn.classList.add('correct');
+                    elG2.feedback.textContent = '¡Correcto! Tirando dado...';
+                    elG2.feedback.className = 'feedback success';
+
+                    g2Players[g2Turn].diff++; // Sube dificultad del jugador
+
+                    setTimeout(() => { doDiceRoll(); }, 800);
+                } else {
+                    btn.classList.add('wrong');
+                    elG2.feedback.textContent = '¡Fallaste! Pierdes tu turno.';
+                    elG2.feedback.className = 'feedback error';
+                    btns.forEach(b => { if (parseInt(b.textContent) === g2CorrectAnswer) b.classList.add('correct'); });
+
+                    setTimeout(() => { endTurn(); }, 2000);
+                }
+            }
+
+            function doDiceRoll() {
+                diceAnimating = true;
+                elG2.qArea.classList.add('hidden');
+                elG2.diceArea.classList.remove('hidden');
+
+                elG2.dice.textContent = '🎲';
+                elG2.diceRes.textContent = 'Tirando...';
+
+                setTimeout(() => {
+                    let roll = Math.floor(Math.random() * 6) + 1;
+                    const diceFaces = ['🎲', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+                    elG2.dice.textContent = diceFaces[roll];
+                    elG2.diceRes.textContent = '¡Avanzas ' + roll + ' casillas!';
+
+                    setTimeout(() => { movePlayer(roll); }, 1500);
+                }, 600);
+            }
+
+            function movePlayer(steps) {
+                let p = g2Players[g2Turn];
+                let target = p.pos + steps;
+                if (target > 50) target = 50 - (target - 50); // Rebote
+
+                p.pos = target;
+                drawTokens();
+                updatePlayersInfo();
+
+                // Check snakes/ladders
+                setTimeout(() => {
+                    if (boardMap[p.pos]) {
+                        let nTarget = boardMap[p.pos];
+                        let msg = nTarget > p.pos ? '¡Escalera! Subes a la ' + nTarget : '¡Serpiente! Bajas a la ' + nTarget;
+                        elG2.diceRes.textContent = msg;
+                        p.pos = nTarget;
+                        setTimeout(() => { drawTokens(); updatePlayersInfo(); checkWin(p); }, 1500);
+                    } else {
+                        checkWin(p);
+                    }
+                }, 700);
+            }
+
+            function checkWin(p) {
+                if (p.pos === 50) {
+                    diceAnimating = false;
+                    elG2.winTitle.textContent = '¡El Jugador ' + p.id + ' ha ganado!';
+                    setTimeout(() => showScreen('g2Win'), 500);
+                    return;
+                }
+                endTurn();
+            }
+
+            function endTurn() {
+                diceAnimating = false;
+                g2Turn = (g2Turn + 1) % g2PlayersCount;
+                startTurn();
+            }
+
+        } catch (e) {
+            document.getElementById('debug-log').textContent = "System Error: " + e.message;
+        }
+
+        // Registro del Service Worker para funcionamiento como App (PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(req => console.log('Service Worker Registrado'))
+                    .catch(err => console.error('Fallo SW:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

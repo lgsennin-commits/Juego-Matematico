@@ -1,0 +1,16 @@
+{
+  "name": "Centro Matemático",
+  "short_name": "Matemáticas",
+  "description": "Juego de retos matemáticos y Serpientes y Escaleras multijugador.",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "background_color": "#a18cd1",
+  "theme_color": "#0077b6",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

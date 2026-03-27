@@ -1,0 +1,566 @@
+:root {
+    --primary-blue: #0077b6;
+    --light-blue: #90e0ef;
+    --ultra-light-blue: #caf0f8;
+    --white: #ffffff;
+    --text-dark: #023e8a;
+    --success: #4ade80;
+    --error: #f87171;
+    --orange: #f97316;
+    --pink: #ec4899;
+    --yellow: #eab308;
+    --green: #22c55e;
+    --purple: #a855f7;
+    --red: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    color: var(--text-dark);
+}
+
+.glass-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    /* expands if wide */
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.glass-container:has(.wide.active) {
+    max-width: 950px;
+    padding: 30px;
+}
+
+.screen {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeIn 0.5s ease;
+}
+
+.screen.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+h1 {
+    font-size: 2.8rem;
+    color: var(--primary-blue);
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+/* BOTONES */
+.primary-btn,
+.secondary-btn {
+    color: var(--white);
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, var(--light-blue), var(--primary-blue));
+    box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3);
+}
+
+.secondary-btn {
+    background: linear-gradient(135deg, #fbc2eb, var(--purple));
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+
+.primary-btn:hover,
+.secondary-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    filter: brightness(1.1);
+}
+
+.text-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.text-btn:hover {
+    color: var(--text-dark);
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.menu-btn {
+    height: 70px;
+    font-size: 1.4rem;
+}
+
+.emoji {
+    font-size: 1.8rem;
+}
+
+/* JUEGO 1 UI */
+.header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--primary-blue);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--ultra-light-blue);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #0096c7, var(--primary-blue));
+    transition: width 0.4s ease;
+    border-radius: 6px;
+}
+
+.question-container {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.question-container.small {
+    font-size: 2.5rem;
+    margin: 10px 0;
+}
+
+#g1-question-mark,
+#g2-question-mark {
+    color: var(--pink);
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.options-grid.small {
+    gap: 10px;
+}
+
+.option-btn {
+    background: var(--white);
+    border: 2px solid var(--ultra-light-blue);
+    color: var(--primary-blue);
+    font-size: 1.6rem;
+    font-weight: 700;
+    padding: 15px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.options-grid.small .option-btn {
+    padding: 10px;
+    font-size: 1.3rem;
+    border-radius: 10px;
+}
+
+.option-btn:hover {
+    background: var(--ultra-light-blue);
+    transform: scale(1.03);
+}
+
+.option-btn.correct {
+    background: var(--success);
+    color: var(--white);
+    border-color: var(--success);
+    transform: scale(1.05);
+}
+
+.option-btn.wrong {
+    background: var(--error);
+    color: var(--white);
+    border-color: var(--error);
+    animation: shake 0.4s;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+
+    75% {
+        transform: translateX(-5px);
+    }
+}
+
+.feedback {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 10px;
+    min-height: 26px;
+    transition: opacity 0.3s;
+}
+
+.feedback.success {
+    color: var(--success);
+}
+
+.feedback.error {
+    color: var(--error);
+}
+
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    visibility: hidden;
+}
+
+/* JUEGO 2 UI (SERPIENTES Y ESCALERAS) */
+.setup-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.player-selector {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 2rem;
+}
+
+.icon-btn {
+    background: var(--ultra-light-blue);
+    color: var(--primary-blue);
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.icon-btn:hover {
+    background: var(--light-blue);
+    transform: scale(1.1);
+}
+
+.g2-layout {
+    display: flex;
+    gap: 30px;
+    align-items: stretch;
+    text-align: left;
+    height: 500px;
+}
+
+.g2-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-right: 2px dashed var(--ultra-light-blue);
+    padding-right: 20px;
+}
+
+.g2-board-area {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    border-radius: 16px;
+    border: 4px solid var(--ultra-light-blue);
+}
+
+/* Tablero */
+.board-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    width: 100%;
+    height: 100%;
+    gap: 2px;
+    background: #e2e8f0;
+    padding: 4px;
+    border-radius: 12px;
+}
+
+.board-cell {
+    position: relative;
+    background: var(--white);
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 5px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.board-cell.bg-1 {
+    background: #fdf4ff;
+}
+
+/* rosa claro */
+.board-cell.bg-2 {
+    background: #f0fdf4;
+}
+
+/* verde claro */
+.board-cell.bg-3 {
+    background: #fffbeb;
+}
+
+/* amarillo claro */
+.board-cell.bg-4 {
+    background: #f0f9ff;
+}
+
+/* azul claro */
+
+/* Serpientes y Escaleras Marcas */
+.sn-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    font-size: 1.5rem;
+    opacity: 0.6;
+    padding: 2px;
+}
+
+/* Fichas / Tokens */
+.player-tokens-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    padding: 8px;
+}
+
+.player-token {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.5s ease;
+    z-index: 10;
+}
+
+.token-p1 {
+    background: var(--red);
+}
+
+.token-p2 {
+    background: var(--green);
+}
+
+.token-p3 {
+    background: var(--yellow);
+}
+
+.token-p4 {
+    background: var(--purple);
+}
+
+/* Sidebar UI */
+.turn-indicator {
+    padding: 10px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+    transition: background 0.3s;
+}
+
+.turn-p1 {
+    background: var(--red);
+}
+
+.turn-p2 {
+    background: var(--green);
+}
+
+.turn-p3 {
+    background: var(--yellow);
+}
+
+.turn-p4 {
+    background: var(--purple);
+}
+
+.players-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.p-card {
+    background: var(--ultra-light-blue);
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.p-card .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.question-box {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    text-align: center;
+}
+
+.question-prompt {
+    font-weight: 600;
+    color: var(--primary-blue);
+    margin-bottom: 5px;
+}
+
+.dice-area {
+    text-align: center;
+    animation: popIn 0.3s;
+    padding: 10px;
+    border-radius: 12px;
+    background: #fffbeb;
+    border: 2px solid var(--yellow);
+}
+
+.dice {
+    font-size: 4rem;
+    margin-bottom: 5px;
+    animation: roll 0.5s;
+}
+
+#dice-result-text {
+    font-weight: 700;
+    color: var(--orange);
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes roll {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.icon-success {
+    font-size: 4rem;
+    animation: popIn 1s infinite alternate;
+}
