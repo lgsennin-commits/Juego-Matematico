@@ -301,6 +301,51 @@
             visibility: hidden;
         }
 
+        /* JUEGO 1 FINANCIERO */
+        .fin-question-container {
+            background: #f0f9ff;
+            border: 2px solid var(--light-blue);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin: 8px 0;
+            text-align: left;
+        }
+
+        .fin-question-text {
+            font-size: 0.98rem;
+            color: var(--text-dark);
+            line-height: 1.75;
+            font-weight: 500;
+            white-space: pre-line;
+        }
+
+        .fin-find-label {
+            margin-top: 10px;
+            font-size: 0.88rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .fin-find-target {
+            color: var(--pink);
+            font-weight: 800;
+        }
+
+        .tier-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 20px;
+            background: var(--ultra-light-blue);
+            color: var(--primary-blue);
+            vertical-align: middle;
+        }
+
+        #g1-options-container .option-btn {
+            font-size: 0.9rem;
+            padding: 12px 8px;
+        }
+
         /* JUEGO 2 UI (SERPIENTES Y ESCALERAS) */
         .setup-container {
             display: flex;
@@ -612,7 +657,7 @@
             <p class="subtitle">Selecciona tu aventura matemática favorita y diviértete aprendiendo.</p>
             <div class="menu-buttons">
                 <button id="btn-menu-g1" class="menu-btn primary-btn">
-                    <span class="emoji">🧠</span> Juego Clásico de Etapas
+                    <span class="emoji">📊</span> Práctica Matemáticas Financieras
                 </button>
                 <button id="btn-menu-g2" class="menu-btn secondary-btn">
                     <span class="emoji">🐍</span> Serpientes y Escaleras
@@ -628,16 +673,16 @@
 
         <!-- JUEGO 1: PANTALLA DE INICIO -->
         <div id="g1-start-screen" class="screen">
-            <h1>Juego de Etapas</h1>
-            <p>Resuelve problemas y avanza. ¡Cada 5 niveles subes de etapa!</p>
-            <button id="btn-start-g1" class="primary-btn">Comenzar Aventura</button>
+            <h1>Práctica de Examen</h1>
+            <p>Matemáticas Financieras: Interés Simple, Descuento, Despejes y más. 5 ejercicios por etapa, dificultad progresiva en 5 niveles (Novato → Maestro).</p>
+            <button id="btn-start-g1" class="primary-btn">Comenzar Práctica</button>
             <button class="text-btn btn-back">Volver al Menú</button>
         </div>
 
         <!-- JUEGO 1: PANTALLA DE JUEGO -->
         <div id="g1-game-screen" class="screen">
             <div class="header">
-                <div class="stage-info">Etapa <span id="g1-stage-display">1</span></div>
+                <div class="stage-info">Etapa <span id="g1-stage-display">1</span> <span id="g1-tier-badge" class="tier-badge">Novato</span></div>
                 <div class="level-info">Nivel <span id="g1-level-display">1</span>/5</div>
             </div>
 
@@ -645,10 +690,9 @@
                 <div id="g1-progress-fill" class="progress-fill"></div>
             </div>
 
-            <div class="question-container">
-                <span id="g1-question-text"></span>
-                <span class="equals">=</span>
-                <span id="g1-question-mark">?</span>
+            <div class="fin-question-container">
+                <p id="g1-question-text" class="fin-question-text"></p>
+                <p class="fin-find-label">Calcula: <span id="g1-question-find" class="fin-find-target"></span></p>
             </div>
 
             <div id="g1-options-container" class="options-grid"></div>
@@ -660,7 +704,7 @@
         <div id="g1-stage-screen" class="screen">
             <div class="icon-success">🏆</div>
             <h2 id="g1-stage-title">¡Etapa Completada!</h2>
-            <p>¡Prepárate para problemas más difíciles!</p>
+            <p id="g1-stage-msg">¡Prepárate para ejercicios más difíciles!</p>
             <button id="btn-next-stage-g1" class="primary-btn">Siguiente Etapa</button>
             <button class="text-btn btn-back" style="margin-top:10px;">Volver al Menú</button>
         </div>
@@ -757,122 +801,406 @@
             });
 
             // ----------------------------------------
-            //  JUEGO 1: ETAPAS
+            //  JUEGO 1: MATEMÁTICAS FINANCIERAS
             // ----------------------------------------
             let g1Stage = 1;
             let g1LevelsWon = 0;
-            let g1CorrectAnswer = 0;
+            let g1CorrectAnswer = '';
+
+            const TIER_NAMES = ['Novato', 'Principiante', 'Intermedio', 'Avanzado', 'Maestro'];
+            const TIER_MSGS = [
+                '¡Bien hecho! Ahora vienen conversiones de unidades de tiempo.',
+                '¡Excelente! Próximo nivel: Método Exacto vs Aproximado.',
+                '¡Muy bien! Ahora despejarás variables: tasa y tiempo.',
+                '¡Increíble! Prepárate para casos reales multi-paso.',
+                '¡Eres un Maestro de las Matemáticas Financieras!'
+            ];
 
             const elG1 = {
                 stageDisp: document.getElementById('g1-stage-display'),
                 levelDisp: document.getElementById('g1-level-display'),
                 progFill: document.getElementById('g1-progress-fill'),
                 qText: document.getElementById('g1-question-text'),
+                qFind: document.getElementById('g1-question-find'),
                 optsGrid: document.getElementById('g1-options-container'),
                 feedback: document.getElementById('g1-feedback'),
-                stageTitle: document.getElementById('g1-stage-title')
+                stageTitle: document.getElementById('g1-stage-title'),
+                stageMsg: document.getElementById('g1-stage-msg'),
+                tierBadge: document.getElementById('g1-tier-badge')
             };
 
-            document.getElementById('btn-start-g1').addEventListener('click', () => { g1Stage = 1; g1LevelsWon = 0; g1UpdateUI(); g1Gen(); showScreen('g1Game'); });
-            document.getElementById('btn-next-stage-g1').addEventListener('click', () => { g1Stage++; g1LevelsWon = 0; g1UpdateUI(); g1Gen(); showScreen('g1Game'); });
+            document.getElementById('btn-start-g1').addEventListener('click', function() {
+                g1Stage = 1; g1LevelsWon = 0; g1UpdateUI(); g1Gen(); showScreen('g1Game');
+            });
+            document.getElementById('btn-next-stage-g1').addEventListener('click', function() {
+                g1Stage++; g1LevelsWon = 0; g1UpdateUI(); g1Gen(); showScreen('g1Game');
+            });
 
             function g1UpdateUI() {
+                const tier = Math.min(Math.ceil(g1Stage / 2), 5);
                 elG1.stageDisp.textContent = g1Stage;
-                elG1.levelDisp.textContent = g1LevelsWon + 1 > 5 ? 5 : g1LevelsWon + 1;
+                elG1.levelDisp.textContent = Math.min(g1LevelsWon + 1, 5);
                 elG1.progFill.style.width = ((g1LevelsWon / 5) * 100) + '%';
+                elG1.tierBadge.textContent = TIER_NAMES[tier - 1];
             }
 
-            function genMath(difficulty) {
-                let operator;
-                if (difficulty === 1) operator = '+';
-                else if (difficulty === 2) operator = '-';
-                else if (difficulty === 3) operator = 'x';
-                else if (difficulty === 4) operator = '/';
-                else {
-                    const ops = ['+', '-', 'x', '/'];
-                    operator = ops[Math.floor(Math.random() * ops.length)];
+            // ---- Helpers financieros ----
+            function fmtMoney(x) {
+                return '\u20a1' + x.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            function fmtUnit(x, unit) {
+                if (unit === 'money')   return fmtMoney(Math.round(x * 100) / 100);
+                if (unit === 'percent') return (Math.round(x * 100) / 100).toFixed(2) + '%';
+                if (unit === 'months')  return Math.round(x) + ' meses';
+                if (unit === 'days')    return Math.round(x) + ' d\u00edas';
+                return String(x);
+            }
+            function pickFin(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+            function makeWrongs(correct, unit, specific) {
+                var wrongs = [];
+                var correctLabel = fmtUnit(correct, unit);
+                var toCheck = (specific || []).concat([]);
+                for (var si = 0; si < toCheck.length; si++) {
+                    var w = toCheck[si];
+                    if (!isFinite(w) || w <= 0) continue;
+                    var wL = fmtUnit(w, unit);
+                    if (wL !== correctLabel && wrongs.indexOf(wL) === -1) wrongs.push(wL);
+                    if (wrongs.length >= 3) break;
                 }
-
-                let num1, num2, correct;
-                let max = 10 + (difficulty * 5);
-
-                switch (operator) {
-                    case '+':
-                        num1 = Math.floor(Math.random() * max) + 1;
-                        num2 = Math.floor(Math.random() * max) + 1;
-                        correct = num1 + num2; break;
-                    case '-':
-                        num1 = Math.floor(Math.random() * max) + 5;
-                        num2 = Math.floor(Math.random() * num1) + 1;
-                        correct = num1 - num2; break;
-                    case 'x':
-                        let mMax = Math.min(12, 3 + difficulty);
-                        num1 = Math.floor(Math.random() * mMax) + 2;
-                        num2 = Math.floor(Math.random() * mMax) + 2;
-                        correct = num1 * num2; break;
-                    case '/':
-                        num2 = Math.floor(Math.random() * 10) + 2;
-                        let temp = Math.floor(Math.random() * 10) + 2;
-                        num1 = num2 * temp;
-                        correct = temp; break;
+                var offsets = [0.80, 0.87, 0.93, 1.07, 1.13, 1.20, 1.25, 0.75].sort(function() { return Math.random() - 0.5; });
+                for (var oi = 0; oi < offsets.length; oi++) {
+                    if (wrongs.length >= 3) break;
+                    var wv = correct * offsets[oi];
+                    if (!isFinite(wv) || wv <= 0) continue;
+                    var wvL = fmtUnit(wv, unit);
+                    if (wvL !== correctLabel && wrongs.indexOf(wvL) === -1) wrongs.push(wvL);
                 }
-                return { n1: num1, op: operator, n2: num2, ans: correct };
+                return wrongs.slice(0, 3);
             }
 
+            // ---- Generador de problemas financieros ----
+            function genFinMath(stage) {
+                var tier = Math.min(Math.ceil(stage / 2), 5);
+                var CAPS   = [5000, 8000, 10000, 12000, 15000, 20000, 25000, 30000];
+                var RATES  = [0.05, 0.08, 0.10, 0.12, 0.15, 0.18, 0.20];
+                var DRATES = [0.05, 0.08, 0.10, 0.12, 0.15];
+                var YEARS  = [1, 2, 3, 4, 5];
+                var MONTHS = [3, 6, 9, 12, 18, 24];
+                var DAYS   = [30, 60, 90, 120, 180, 270, 360];
+
+                var C  = pickFin(CAPS);
+                var i  = pickFin(RATES);
+                var d  = pickFin(DRATES);
+                var tY = pickFin(YEARS);
+                var tM = pickFin(MONTHS);
+                var tD = pickFin(DAYS);
+
+                var typesByTier = {
+                    1: ['IS_I', 'IS_M', 'DC_D', 'DC_Vn'],
+                    2: ['IS_I_meses', 'IS_I_dias', 'IS_M_meses', 'DC_Vn_meses'],
+                    3: ['IS_exacto', 'IS_aprox', 'DC_exacto', 'DC_aprox'],
+                    4: ['IS_find_i', 'IS_find_t', 'DC_cadena', 'DC_find_d'],
+                    5: ['M1_doble_paso', 'M2_find_rate', 'M3_equiv_desc', 'M4_find_days']
+                };
+                var type = pickFin(typesByTier[tier]);
+
+                var question, findLabel, correct, unit, spec = [];
+
+                switch (type) {
+                    /* ---- TIER 1: Directos, misma unidad ---- */
+                    case 'IS_I': {
+                        var I = Math.round(C * i * tY * 100) / 100;
+                        question = 'Se invierte un capital de ' + fmtMoney(C) + ' a una tasa de inter\u00e9s simple del ' + (i*100).toFixed(0) + '% anual durante ' + tY + ' a\u00f1o' + (tY > 1 ? 's' : '') + '.';
+                        findLabel = 'el Inter\u00e9s Simple \u2014 I = C \u00b7 i \u00b7 t';
+                        correct = I; unit = 'money';
+                        spec = [C*i, C+I, C*i*tY*tY];
+                        break;
+                    }
+                    case 'IS_M': {
+                        var Im = Math.round(C * i * tY * 100) / 100;
+                        var M  = C + Im;
+                        question = 'Se invierte un capital de ' + fmtMoney(C) + ' a una tasa de inter\u00e9s simple del ' + (i*100).toFixed(0) + '% anual durante ' + tY + ' a\u00f1o' + (tY > 1 ? 's' : '') + '.';
+                        findLabel = 'el Monto \u2014 M = C + I';
+                        correct = M; unit = 'money';
+                        spec = [Im, C*(1+i), C+C*i];
+                        break;
+                    }
+                    case 'DC_D': {
+                        var Dd = Math.round(C * d * tY * 100) / 100;
+                        question = 'Una letra con valor nominal de ' + fmtMoney(C) + ' vence en ' + tY + ' a\u00f1o' + (tY > 1 ? 's' : '') + '. Tasa de descuento: ' + (d*100).toFixed(0) + '% anual.';
+                        findLabel = 'el Descuento \u2014 D = V \u00b7 d \u00b7 t';
+                        correct = Dd; unit = 'money';
+                        spec = [C*d, C-Dd, C*d*tY*tY];
+                        break;
+                    }
+                    case 'DC_Vn': {
+                        var Dvn = Math.round(C * d * tY * 100) / 100;
+                        var Vn  = C - Dvn;
+                        question = 'Una letra con valor nominal de ' + fmtMoney(C) + ' vence en ' + tY + ' a\u00f1o' + (tY > 1 ? 's' : '') + '. Tasa de descuento: ' + (d*100).toFixed(0) + '% anual.';
+                        findLabel = 'el Valor Neto \u2014 Vn = V(1 \u2212 d\u00b7t)';
+                        correct = Vn; unit = 'money';
+                        spec = [Dvn, C*(1-d), C-C*d*tY*tY];
+                        break;
+                    }
+                    /* ---- TIER 2: Conversiones de tiempo ---- */
+                    case 'IS_I_meses': {
+                        var ta = tM / 12;
+                        var I5 = Math.round(C * i * ta * 100) / 100;
+                        question = 'Se invierte ' + fmtMoney(C) + ' al ' + (i*100).toFixed(0) + '% anual simple durante ' + tM + ' meses.';
+                        findLabel = 'el Inter\u00e9s Simple \u2014 convierte meses a a\u00f1os (\u00f712)';
+                        correct = I5; unit = 'money';
+                        spec = [C*i*tM, C*i*1, C*i*(tM/365)];
+                        break;
+                    }
+                    case 'IS_I_dias': {
+                        var ta2 = tD / 360;
+                        var I6  = Math.round(C * i * ta2 * 100) / 100;
+                        question = 'Se invierte ' + fmtMoney(C) + ' al ' + (i*100).toFixed(0) + '% anual simple durante ' + tD + ' d\u00edas (a\u00f1o comercial = 360 d\u00edas).';
+                        findLabel = 'el Inter\u00e9s Simple \u2014 convierte d\u00edas a a\u00f1os (\u00f7360)';
+                        correct = I6; unit = 'money';
+                        spec = [C*i*tD, C*i*(tD/365), C*i*(tD/12)];
+                        break;
+                    }
+                    case 'IS_M_meses': {
+                        var ta3 = tM / 12;
+                        var I7  = Math.round(C * i * ta3 * 100) / 100;
+                        var M7  = C + I7;
+                        question = 'Un capital de ' + fmtMoney(C) + ' se coloca al ' + (i*100).toFixed(0) + '% anual simple por ' + tM + ' meses.';
+                        findLabel = 'el Monto (M) \u2014 convierte meses a a\u00f1os';
+                        correct = M7; unit = 'money';
+                        spec = [C+C*i*tM, I7, C*(1+i)];
+                        break;
+                    }
+                    case 'DC_Vn_meses': {
+                        var d8  = pickFin([0.05, 0.08, 0.10, 0.12]);
+                        var ta4 = tM / 12;
+                        var D8  = Math.round(C * d8 * ta4 * 100) / 100;
+                        var Vn8 = C - D8;
+                        question = 'Un pagar\u00e9 de ' + fmtMoney(C) + ' vence en ' + tM + ' meses. Tasa de descuento: ' + (d8*100).toFixed(0) + '% anual.';
+                        findLabel = 'el Valor Neto (Vn) \u2014 convierte meses a a\u00f1os';
+                        correct = Vn8; unit = 'money';
+                        spec = [C-C*d8*tM, D8, C*(1-d8)];
+                        break;
+                    }
+                    /* ---- TIER 3: Método Exacto vs Aproximado ---- */
+                    case 'IS_exacto': {
+                        var I9 = Math.round(C * i * (tD / 365) * 100) / 100;
+                        question = 'Capital: ' + fmtMoney(C) + '  \u00b7  Tasa: ' + (i*100).toFixed(0) + '% anual  \u00b7  Plazo: ' + tD + ' d\u00edas\nM\u00e9todo Exacto (a\u00f1o = 365 d\u00edas).';
+                        findLabel = 'el Inter\u00e9s Simple con M\u00e9todo Exacto';
+                        correct = I9; unit = 'money';
+                        spec = [C*i*(tD/360), C*i*tD, C*i*(tD/12)];
+                        break;
+                    }
+                    case 'IS_aprox': {
+                        var I10 = Math.round(C * i * (tD / 360) * 100) / 100;
+                        question = 'Capital: ' + fmtMoney(C) + '  \u00b7  Tasa: ' + (i*100).toFixed(0) + '% anual  \u00b7  Plazo: ' + tD + ' d\u00edas\nM\u00e9todo Aproximado (a\u00f1o comercial = 360 d\u00edas).';
+                        findLabel = 'el Inter\u00e9s Simple con M\u00e9todo Aproximado';
+                        correct = I10; unit = 'money';
+                        spec = [C*i*(tD/365), C*i*tD, C*i*(tD/30)];
+                        break;
+                    }
+                    case 'DC_exacto': {
+                        var d11 = pickFin([0.05, 0.08, 0.10, 0.12]);
+                        var D11 = Math.round(C * d11 * (tD / 365) * 100) / 100;
+                        var Vn11 = C - D11;
+                        question = 'Valor nominal: ' + fmtMoney(C) + '  \u00b7  Tasa desc.: ' + (d11*100).toFixed(0) + '% anual  \u00b7  Plazo: ' + tD + ' d\u00edas\nM\u00e9todo Exacto (365 d\u00edas).';
+                        findLabel = 'el Valor Neto (Vn) con M\u00e9todo Exacto';
+                        correct = Vn11; unit = 'money';
+                        spec = [C-C*d11*(tD/360), D11, C-C*d11];
+                        break;
+                    }
+                    case 'DC_aprox': {
+                        var d12 = pickFin([0.05, 0.08, 0.10, 0.12]);
+                        var D12 = Math.round(C * d12 * (tD / 360) * 100) / 100;
+                        var Vn12 = C - D12;
+                        question = 'Valor nominal: ' + fmtMoney(C) + '  \u00b7  Tasa desc.: ' + (d12*100).toFixed(0) + '% anual  \u00b7  Plazo: ' + tD + ' d\u00edas\nM\u00e9todo Aproximado (360 d\u00edas).';
+                        findLabel = 'el Valor Neto (Vn) con M\u00e9todo Aproximado';
+                        correct = Vn12; unit = 'money';
+                        spec = [C-C*d12*(tD/365), D12, C-C*d12];
+                        break;
+                    }
+                    /* ---- TIER 4: Despejes ---- */
+                    case 'IS_find_i': {
+                        var iT  = pickFin(RATES);
+                        var tMA = pickFin(MONTHS);
+                        var IA  = Math.round(C * iT * (tMA / 12) * 100) / 100;
+                        question = 'Un capital de ' + fmtMoney(C) + ' gener\u00f3 un inter\u00e9s de ' + fmtMoney(IA) + ' en ' + tMA + ' meses (inter\u00e9s simple).';
+                        findLabel = 'la Tasa Anual (i%) \u2014 despeja: i = I \u00f7 (C\u00b7t)';
+                        correct = Math.round(iT * 10000) / 100; unit = 'percent';
+                        spec = [Math.round((IA/C)*10000)/100, Math.round(iT*tMA*10000)/100, Math.round((iT/tMA)*1200*100)/100];
+                        break;
+                    }
+                    case 'IS_find_t': {
+                        var iT2 = pickFin(RATES);
+                        var tMB = pickFin(MONTHS);
+                        var IB  = Math.round(C * iT2 * (tMB / 12) * 100) / 100;
+                        question = 'Un capital de ' + fmtMoney(C) + ' al ' + (iT2*100).toFixed(0) + '% anual simple gener\u00f3 un inter\u00e9s de ' + fmtMoney(IB) + '.';
+                        findLabel = '\u00bfCu\u00e1ntos meses dur\u00f3? \u2014 despeja t, luego \u00d712';
+                        correct = tMB; unit = 'months';
+                        spec = [tMB/12, tMB*12, tMB+6];
+                        break;
+                    }
+                    case 'DC_cadena': {
+                        var d1c  = pickFin([0.05, 0.08, 0.10]);
+                        var d2c  = pickFin([0.03, 0.05, 0.06]);
+                        var tC   = pickFin([1, 2]);
+                        var Vn1c = Math.round(C * (1 - d1c * tC) * 100) / 100;
+                        var Vn2c = Math.round(Vn1c * (1 - d2c * tC) * 100) / 100;
+                        question = 'Descuento en cadena sobre ' + fmtMoney(C) + ':\n1\u00aa tasa: ' + (d1c*100).toFixed(0) + '% anual  \u00b7  2\u00aa tasa: ' + (d2c*100).toFixed(0) + '% anual\nPlazo de ' + tC + ' a\u00f1o' + (tC > 1 ? 's' : '') + ' para cada descuento.';
+                        findLabel = 'el Valor Neto Final (aplica los dos descuentos en orden)';
+                        correct = Vn2c; unit = 'money';
+                        spec = [C*(1-(d1c+d2c)*tC), Vn1c, C*(1-d1c*tC)*(1-d2c)];
+                        break;
+                    }
+                    case 'DC_find_d': {
+                        var dT   = pickFin([0.05, 0.08, 0.10, 0.12]);
+                        var tD2  = pickFin([1, 2]);
+                        var VnD2 = Math.round(C * (1 - dT * tD2) * 100) / 100;
+                        question = 'Una letra de ' + fmtMoney(C) + ' se negoci\u00f3 por ' + fmtMoney(VnD2) + ' con vencimiento en ' + tD2 + ' a\u00f1o' + (tD2 > 1 ? 's' : '') + '.';
+                        findLabel = 'la Tasa de Descuento (d%) \u2014 despeja: d = D \u00f7 (V\u00b7t)';
+                        correct = Math.round(dT * 10000) / 100; unit = 'percent';
+                        spec = [Math.round(((C-VnD2)/C)*10000)/100, Math.round(dT*tD2*10000)/100, Math.round((dT/tD2)*10000)/100];
+                        break;
+                    }
+                    /* ---- TIER 5: Casos Maestro ---- */
+                    case 'M1_doble_paso': {
+                        var CM   = pickFin([20000, 25000, 30000]);
+                        var iM1  = pickFin([0.10, 0.12, 0.15]);
+                        var tM1  = pickFin([2, 3]);
+                        var IM1  = Math.round(CM * iM1 * tM1 * 100) / 100;
+                        var MM1  = CM + IM1;
+                        var dM1  = pickFin([0.08, 0.10, 0.12]);
+                        var VnM1 = Math.round(MM1 * (1 - dM1) * 100) / 100;
+                        question = 'Juan invirti\u00f3 ' + fmtMoney(CM) + ' al ' + (iM1*100).toFixed(0) + '% anual simple por ' + tM1 + ' a\u00f1os.\nAl vencer, us\u00f3 el Monto para descontar un pagar\u00e9 al ' + (dM1*100).toFixed(0) + '% anual por 1 a\u00f1o.';
+                        findLabel = '\u00bfCu\u00e1nto recibi\u00f3 neto? \u2014 Paso 1: calcula M. Paso 2: descuenta M.';
+                        correct = VnM1; unit = 'money';
+                        spec = [MM1, CM*(1-dM1), IM1+VnM1];
+                        break;
+                    }
+                    case 'M2_find_rate': {
+                        var CM2  = pickFin([10000, 15000, 20000, 25000]);
+                        var iM2  = pickFin(RATES);
+                        var tM2  = pickFin(MONTHS);
+                        var IM2  = Math.round(CM2 * iM2 * (tM2 / 12) * 100) / 100;
+                        var MM2  = CM2 + IM2;
+                        question = 'Ana deposit\u00f3 ' + fmtMoney(CM2) + '. Despu\u00e9s de ' + tM2 + ' meses retir\u00f3 ' + fmtMoney(MM2) + ' (capital + intereses).';
+                        findLabel = '\u00bfCu\u00e1l fue la tasa anual? \u2014 calcula I, luego i = I \u00f7 (C\u00b7t)';
+                        correct = Math.round(iM2 * 10000) / 100; unit = 'percent';
+                        spec = [Math.round((IM2/CM2)*10000)/100, Math.round(iM2*tM2*10000)/100, Math.round((IM2/CM2*12/tM2)*10000)/100];
+                        break;
+                    }
+                    case 'M3_equiv_desc': {
+                        var VM3  = pickFin([40000, 50000, 60000]);
+                        var d1M  = pickFin([0.05, 0.08, 0.10]);
+                        var d2M  = pickFin([0.03, 0.05, 0.06]);
+                        var Vn1M3 = Math.round(VM3 * (1 - d1M) * 100) / 100;
+                        var Vn2M3 = Math.round(Vn1M3 * (1 - d2M) * 100) / 100;
+                        var dEq  = Math.round((d1M + d2M - d1M * d2M) * 10000) / 100;
+                        question = 'Descuento en cadena (1 a\u00f1o c/u) sobre ' + fmtMoney(VM3) + ': primero ' + (d1M*100).toFixed(0) + '%, luego ' + (d2M*100).toFixed(0) + '%.\nValor Neto final: ' + fmtMoney(Vn2M3) + '.';
+                        findLabel = 'la Tasa \u00danica Equivalente (%) \u2014 d_eq = d\u2081 + d\u2082 \u2212 d\u2081\u00b7d\u2082';
+                        correct = dEq; unit = 'percent';
+                        spec = [(d1M+d2M)*100, Math.round(d1M*d2M*10000)/100, Math.round(d1M*10000)/100];
+                        break;
+                    }
+                    case 'M4_find_days': {
+                        var iM4  = pickFin([0.10, 0.12, 0.15]);
+                        var tM4  = pickFin([30, 60, 90, 180]);
+                        var IM4  = Math.round(C * iM4 * (tM4 / 365) * 100) / 100;
+                        question = 'Un pagar\u00e9 de ' + fmtMoney(C) + ' al ' + (iM4*100).toFixed(0) + '% anual (M\u00e9todo Exacto) gener\u00f3 ' + fmtMoney(IM4) + ' de inter\u00e9s.';
+                        findLabel = '\u00bfCu\u00e1ntos d\u00edas dur\u00f3? \u2014 despeja: t = (I\u00b7365) \u00f7 (C\u00b7i)';
+                        correct = tM4; unit = 'days';
+                        spec = [Math.round(tM4*365/360), tM4/30, tM4+30];
+                        break;
+                    }
+                    default: {
+                        var Idef = Math.round(C * i * tY * 100) / 100;
+                        question = 'Capital: ' + fmtMoney(C) + '  \u00b7  Tasa: ' + (i*100).toFixed(0) + '% anual  \u00b7  Plazo: ' + tY + ' a\u00f1o' + (tY > 1 ? 's' : '') + '.';
+                        findLabel = 'el Inter\u00e9s Simple (I)';
+                        correct = Idef; unit = 'money'; spec = [];
+                    }
+                }
+
+                var correctLabel = fmtUnit(correct, unit);
+                var wrongLabels  = makeWrongs(correct, unit, spec);
+                return { question: question, findLabel: findLabel, correctLabel: correctLabel, wrongLabels: wrongLabels };
+            }
+
+            // ---- Generación y verificación de preguntas ----
             function g1Gen() {
                 elG1.feedback.className = 'feedback hidden';
                 elG1.optsGrid.innerHTML = '';
 
-                let prob = genMath(g1Stage);
-                g1CorrectAnswer = prob.ans;
-                elG1.qText.textContent = prob.n1 + " " + prob.op + " " + prob.n2;
+                var prob = genFinMath(g1Stage);
+                g1CorrectAnswer = prob.correctLabel;
+                elG1.qText.textContent = prob.question;
+                elG1.qFind.textContent = prob.findLabel;
 
-                let opts = [prob.ans];
-                while (opts.length < 4) {
-                    let off = Math.floor(Math.random() * 10) - 5;
-                    if (off === 0) off = 1;
-                    let w = prob.ans + off;
-                    if (w < 0 && prob.op !== '-') w = Math.abs(w) + 2;
-                    if (opts.indexOf(w) === -1) opts.push(w);
-                }
-                opts.sort(() => Math.random() - 0.5);
-
-                opts.forEach(function (o) {
-                    let b = document.createElement('button');
+                var opts = [prob.correctLabel].concat(prob.wrongLabels).sort(function() { return Math.random() - 0.5; });
+                opts.forEach(function(o) {
+                    var b = document.createElement('button');
                     b.className = 'option-btn';
                     b.textContent = o;
-                    b.onclick = function () { g1Check(o, b); };
+                    b.onclick = function() { g1Check(o, b); };
                     elG1.optsGrid.appendChild(b);
                 });
             }
 
             function g1Check(sel, btn) {
-                const btns = elG1.optsGrid.querySelectorAll('.option-btn');
-                btns.forEach(b => b.style.pointerEvents = 'none');
+                var btns = elG1.optsGrid.querySelectorAll('.option-btn');
+                btns.forEach(function(b) { b.style.pointerEvents = 'none'; });
 
                 if (sel === g1CorrectAnswer) {
                     btn.classList.add('correct');
-                    elG1.feedback.textContent = '¡Correcto!';
+                    elG1.feedback.textContent = '\u00a1Correcto!';
                     elG1.feedback.className = 'feedback success';
                     g1LevelsWon++;
                     g1UpdateUI();
-                    setTimeout(() => {
+                    setTimeout(function() {
                         if (g1LevelsWon >= 5) {
                             elG1.progFill.style.width = '100%';
-                            setTimeout(() => { elG1.stageTitle.textContent = '¡Etapa ' + g1Stage + ' Completada!'; showScreen('g1Stage'); }, 400);
-                        } else g1Gen();
+                            setTimeout(function() {
+                                var tier = Math.min(Math.ceil(g1Stage / 2), 5);
+                                elG1.stageTitle.textContent = '\u00a1Etapa ' + g1Stage + ' Completada!';
+                                elG1.stageMsg.textContent = TIER_MSGS[tier - 1] || '\u00a1Sigue practicando!';
+                                showScreen('g1Stage');
+                            }, 400);
+                        } else {
+                            g1Gen();
+                        }
                     }, 1000);
                 } else {
                     btn.classList.add('wrong');
-                    elG1.feedback.textContent = '¡Incorrecto! Intenta otra vez.';
+                    elG1.feedback.textContent = '\u00a1Incorrecto! Revisa la f\u00f3rmula.';
                     elG1.feedback.className = 'feedback error';
-                    btns.forEach(b => { if (parseInt(b.textContent) === g1CorrectAnswer) b.classList.add('correct'); });
-                    setTimeout(g1Gen, 1500);
+                    btns.forEach(function(b) { if (b.textContent === g1CorrectAnswer) b.classList.add('correct'); });
+                    setTimeout(g1Gen, 2000);
                 }
             }
 
             // ----------------------------------------
             //  JUEGO 2: SERPIENTES Y ESCALERAS
+            //  (usa aritmética básica — función genMath)
+            // ----------------------------------------
+            function genMath(difficulty) {
+                var ops = ['+', '-', 'x', '/'];
+                var operator;
+                if (difficulty === 1) operator = '+';
+                else if (difficulty === 2) operator = '-';
+                else if (difficulty === 3) operator = 'x';
+                else if (difficulty === 4) operator = '/';
+                else operator = ops[Math.floor(Math.random() * ops.length)];
+
+                var num1, num2, correct;
+                var max = 10 + (difficulty * 5);
+                switch (operator) {
+                    case '+': num1 = Math.floor(Math.random()*max)+1; num2 = Math.floor(Math.random()*max)+1; correct = num1+num2; break;
+                    case '-': num1 = Math.floor(Math.random()*max)+5; num2 = Math.floor(Math.random()*num1)+1; correct = num1-num2; break;
+                    case 'x': var mMax=Math.min(12,3+difficulty); num1=Math.floor(Math.random()*mMax)+2; num2=Math.floor(Math.random()*mMax)+2; correct=num1*num2; break;
+                    case '/': num2=Math.floor(Math.random()*10)+2; var tmp=Math.floor(Math.random()*10)+2; num1=num2*tmp; correct=tmp; break;
+                }
+                return { n1: num1, op: operator, n2: num2, ans: correct };
+            }
+
             // ----------------------------------------
             let g2PlayersCount = 2;
             let g2Players = [];
